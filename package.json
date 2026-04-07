@@ -1,0 +1,25 @@
+{
+  "name": "backend-samurai-01",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "repository": "git@github.com:Dmi3Iva/backend-samurai-01.git",
+  "author": "Dmitrii Ivanov <dmi3iva@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently \"tsc --watch\" \"nodemon ./dist/index.js\"",
+    "watch": "tsc --watch",
+    "debug": "node --inspect ./dist/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.2",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}
