@@ -49,7 +49,7 @@ export const usersTestManager = {
   async createEntity(
     data: CreateUserModel,
     statusCode: HttpStatusCode = HTTP_CODES.HTTP_STATUS_CREATED,
-  ): Promise<{ createdEntity: UserViewModel | null; response: any }> {
+  ): Promise<{ createdEntity: UserViewModel; response: any }> {
     const res = await request(app).post(basePath).send(data).expect(statusCode);
 
     let createdEntity;

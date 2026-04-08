@@ -49,7 +49,7 @@ export const coursesTestManager = {
   async createEntity(
     data: CreateCourseModel,
     statusCode: HttpStatusCode = HTTP_CODES.HTTP_STATUS_CREATED,
-  ): Promise<{ createdEntity: CourseViewModel | null; response: any }> {
+  ): Promise<{ createdEntity: CourseViewModel; response: any }> {
     const res = await request(app).post(basePath).send(data).expect(statusCode);
 
     let createdEntity;

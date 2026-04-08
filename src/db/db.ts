@@ -9,8 +9,8 @@ export interface CourseType {
   studentsCount: number;
 }
 
-export interface StudentCourseBinding {
-  studentId: number;
+export interface UserCourseBinding {
+  userId: number;
   courseId: number;
   date: Date;
 }
@@ -18,7 +18,7 @@ export interface StudentCourseBinding {
 export type DBType = {
   courses: CourseType[];
   users: UserType[];
-  studentCourseBindings: StudentCourseBinding[];
+  userCourseBindings: UserCourseBinding[];
 };
 
 export const db: DBType = {
@@ -32,9 +32,9 @@ export const db: DBType = {
     { id: 1, userName: "dimych" },
     { id: 2, userName: "ivan" },
   ],
-  studentCourseBindings: [
-    { studentId: 1, courseId: 1, date: new Date(2022, 10, 1) },
-    { studentId: 1, courseId: 2, date: new Date(2022, 10, 1) },
-    { studentId: 2, courseId: 2, date: new Date(2022, 10, 1) },
+  userCourseBindings: [
+    { userId: 1, courseId: 1, date: new Date(2022, 10, 1) },
+    { userId: 1, courseId: 2, date: new Date(2022, 10, 1) },
+    { userId: 2, courseId: 2, date: new Date(2022, 10, 1) },
   ],
 };
