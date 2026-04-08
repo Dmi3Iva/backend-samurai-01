@@ -3,6 +3,7 @@ import { app, ROUTER_PATHS } from "../../src/app";
 import { constants } from "node:http2";
 import type { CreateUserModel } from "../../src/features/users/models/CreateUserModel";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { usersTestManager } from "../utils/usersTestManager";
 
 const getRequest = () => request(app);
 
@@ -38,10 +39,7 @@ describe("tests for /users", () => {
   it(`should create Entity with correct input data`, async () => {
     const data: CreateUserModel = { userName: "Dymich" };
 
-    const createResponse = await getRequest()
-      .post(baseUrl)
-      .send(data)
-      .expect(constants.HTTP_STATUS_CREATED);
+    const createResponse = await usersTestManager.createEntity(data);
 
     createdEntity1 = createResponse.body;
 
@@ -59,10 +57,7 @@ describe("tests for /users", () => {
   it(`create one more entity`, async () => {
     const data: CreateUserModel = { userName: "Oleg" };
 
-    const createResponse = await getRequest()
-      .post(baseUrl)
-      .send(data)
-      .expect(constants.HTTP_STATUS_CREATED);
+    const createResponse = await usersTestManager.createEntity(data);
 
     createdEntity2 = createResponse.body;
 
@@ -76,7 +71,7 @@ describe("tests for /users", () => {
       .expect(constants.HTTP_STATUS_OK, [createdEntity1, createdEntity2]);
   });
 
-  it(`shoudln't update entity with incorrect input data`, async () => {
+  it(`shouldn't update entity with incorrect input data`, async () => {
     const data: CreateUserModel = { userName: "" };
 
     await getRequest()
@@ -96,7 +91,7 @@ describe("tests for /users", () => {
       .expect(constants.HTTP_STATUS_NOT_FOUND);
   });
 
-  it(`shpudl update entity with correct input data`, async () => {
+  it(`should update entity with correct input data`, async () => {
     const data: CreateUserModel = { userName: "IVAN" };
 
     await getRequest()
@@ -136,7 +131,5 @@ describe("tests for /users", () => {
     await getRequest().get(baseUrl).expect(constants.HTTP_STATUS_OK, []);
   });
 
-  // afterAll(() => {
-  //   // done();
-  // });
+  afterAll(() => {});
 });
