@@ -4,10 +4,14 @@ import { constants } from "node:http2";
 import type { CreateUserModel } from "../../src/features/users/models/CreateUserModel";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { usersTestManager } from "../utils/usersTestManager";
+import type { UserViewModel } from "../../src/features/users/models/UserViewModel";
 
 const getRequest = () => request(app);
 
 const baseUrl = ROUTER_PATHS.users;
+
+const { getEntity, deleteEntity, getEntities, createEntity, updateEntity } =
+  usersTestManager;
 
 describe("tests for /users", () => {
   beforeAll(async () => {
@@ -15,120 +19,118 @@ describe("tests for /users", () => {
   });
 
   it("should return 200 and empty array", async () => {
-    await getRequest().get(baseUrl).expect(constants.HTTP_STATUS_OK, []);
+    await getEntities({});
   });
 
   it("should return 404 for not existing entity", async () => {
-    await getRequest()
-      .get(`${baseUrl}/1`)
-      .expect(constants.HTTP_STATUS_NOT_FOUND);
+    await getEntity({
+      id: 1,
+      statusCode: constants.HTTP_STATUS_NOT_FOUND,
+    });
   });
 
   it(`shouldn't create entity with incorrect input data`, async () => {
     const data: CreateUserModel = { userName: "" };
 
-    await getRequest()
-      .post(baseUrl)
-      .send(data)
-      .expect(constants.HTTP_STATUS_BAD_REQUEST);
+    await createEntity(data, constants.HTTP_STATUS_BAD_REQUEST);
 
-    await getRequest().get(baseUrl).expect(constants.HTTP_STATUS_OK, []);
+    await getEntities({});
   });
 
   let createdEntity1: any = null;
   it(`should create Entity with correct input data`, async () => {
     const data: CreateUserModel = { userName: "Dymich" };
 
-    const createResponse = await usersTestManager.createEntity(data);
+    const { createdEntity } = await createEntity(data);
 
-    createdEntity1 = createResponse.body;
+    createdEntity1 = createdEntity;
 
-    expect(createdEntity1).toEqual({
-      id: expect.any(Number),
-      userName: data.userName,
-    });
-
-    await getRequest()
-      .get(baseUrl)
-      .expect(constants.HTTP_STATUS_OK, [createdEntity1]);
+    await getEntities({ expectedValue: [createdEntity1] });
   });
 
-  let createdEntity2: any = null;
+  let createdEntity2: UserViewModel | null | undefined = null;
   it(`create one more entity`, async () => {
     const data: CreateUserModel = { userName: "Oleg" };
 
-    const createResponse = await usersTestManager.createEntity(data);
+    const { createdEntity } = await createEntity(data);
 
-    createdEntity2 = createResponse.body;
+    createdEntity2 = createdEntity;
 
-    expect(createdEntity2).toEqual({
-      id: expect.any(Number),
-      userName: data.userName,
+    await getEntities({
+      expectedValue: [createdEntity1, createdEntity2],
     });
-
-    await getRequest()
-      .get(baseUrl)
-      .expect(constants.HTTP_STATUS_OK, [createdEntity1, createdEntity2]);
   });
 
   it(`shouldn't update entity with incorrect input data`, async () => {
     const data: CreateUserModel = { userName: "" };
 
-    await getRequest()
-      .put(`${baseUrl}/${createdEntity1.id}`)
-      .send(data)
-      .expect(constants.HTTP_STATUS_BAD_REQUEST);
+    await updateEntity(
+      createdEntity1.id,
+      data,
+      constants.HTTP_STATUS_BAD_REQUEST,
+    );
 
-    await getRequest()
-      .get(baseUrl)
-      .expect(constants.HTTP_STATUS_OK, [createdEntity1, createdEntity2]);
+    await getEntities({
+      expectedValue: [createdEntity1, createdEntity2],
+    });
   });
 
   it(`shouldn't update entity that not exist`, async () => {
-    await getRequest()
-      .put(`${baseUrl}/${-100}`)
-      .send({ userName: "IVAN" })
-      .expect(constants.HTTP_STATUS_NOT_FOUND);
+    await updateEntity(
+      -100,
+      { userName: "IVAN" },
+      constants.HTTP_STATUS_NOT_FOUND,
+    );
   });
 
   it(`should update entity with correct input data`, async () => {
     const data: CreateUserModel = { userName: "IVAN" };
 
-    await getRequest()
-      .put(`${baseUrl}/${createdEntity1.id}`)
-      .send(data)
-      .expect(constants.HTTP_STATUS_NO_CONTENT);
+    await updateEntity(
+      createdEntity1.id,
+      data,
+      constants.HTTP_STATUS_NO_CONTENT,
+    );
 
-    await getRequest()
-      .get(`${baseUrl}/${createdEntity1.id}`)
-      .expect(constants.HTTP_STATUS_OK, {
+    await getEntity({
+      id: createdEntity1.id,
+      expectedValue: {
         id: createdEntity1.id,
         userName: data.userName,
-      });
+      },
+    });
 
-    await getRequest()
-      .get(`${baseUrl}/${createdEntity2.id}`)
-      .expect(constants.HTTP_STATUS_OK, createdEntity2);
+    await getEntity({
+      id: createdEntity2?.id,
+      expectedValue: createdEntity2,
+    });
+
+    await getEntity({
+      id: createdEntity2?.id,
+      expectedValue: createdEntity2,
+    });
   });
 
   it(`shpudl delete both courses`, async () => {
-    await getRequest()
-      .delete(`${baseUrl}/${createdEntity1.id}`)
-      .expect(constants.HTTP_STATUS_NO_CONTENT);
+    await deleteEntity({
+      id: createdEntity1.id,
+    });
 
-    await getRequest()
-      .get(`${baseUrl}/${createdEntity1.id}`)
-      .expect(constants.HTTP_STATUS_NOT_FOUND);
+    await getEntity({
+      id: createdEntity1.id,
+      statusCode: constants.HTTP_STATUS_NOT_FOUND,
+    });
 
-    await getRequest()
-      .delete(`${baseUrl}/${createdEntity2.id}`)
-      .expect(constants.HTTP_STATUS_NO_CONTENT);
+    await deleteEntity({
+      id: createdEntity2?.id,
+    });
 
-    await getRequest()
-      .get(`${baseUrl}/${createdEntity2.id}`)
-      .expect(constants.HTTP_STATUS_NOT_FOUND);
+    await getEntity({
+      id: createdEntity2?.id,
+      statusCode: constants.HTTP_STATUS_NOT_FOUND,
+    });
 
-    await getRequest().get(baseUrl).expect(constants.HTTP_STATUS_OK, []);
+    await getEntities({ expectedValue: [] });
   });
 
   afterAll(() => {});
